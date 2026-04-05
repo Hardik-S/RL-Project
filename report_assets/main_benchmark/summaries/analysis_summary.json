@@ -1,0 +1,39 @@
+{
+  "algorithms": [
+    "a2c",
+    "ppo_clip",
+    "ppo_kl",
+    "trpo"
+  ],
+  "environments": [
+    "halfcheetah_v4",
+    "hopper_v4",
+    "pendulum_v1",
+    "walker2d_v4"
+  ],
+  "figures": [
+    "training_return_curves.pdf",
+    "training_return_curves.png",
+    "wall_clock_comparison.pdf",
+    "wall_clock_comparison.png"
+  ],
+  "primary_run_count": 80,
+  "run_count": 85,
+  "sweep_run_count": 0,
+  "tables": [
+    "checkpoint_metrics.csv",
+    "curve_summary.csv",
+    "final_evaluation_return.csv",
+    "final_evaluation_return.tex",
+    "final_evaluation_variance.csv",
+    "final_evaluation_variance.tex",
+    "instability_frequency.csv",
+    "instability_frequency.tex",
+    "primary_run_summary.csv",
+    "run_summary.csv",
+    "sensitivity_summary.csv",
+    "update_metrics.csv",
+    "wall_clock_comparison.csv",
+    "wall_clock_comparison.tex"
+  ]
+}

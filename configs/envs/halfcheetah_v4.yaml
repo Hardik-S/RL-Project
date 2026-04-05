@@ -1,0 +1,4 @@
+env:
+  key: halfcheetah_v4
+  env_id: HalfCheetah-v4
+  total_timesteps: 300000

@@ -1,0 +1,10 @@
+{
+  "collapse_reasons": {
+    "policy_loss_nan": 80
+  },
+  "completed_runs": 0,
+  "failed_runs": 0,
+  "missing_runs": 0,
+  "partial_or_corrupted_runs": 80,
+  "total_expected_runs": 80
+}

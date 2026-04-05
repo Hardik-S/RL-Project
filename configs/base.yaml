@@ -1,0 +1,79 @@
+project:
+  name: rl-update-stability
+  results_root: results
+
+benchmark:
+  algorithms:
+    - a2c
+    - ppo_clip
+    - ppo_kl
+    - trpo
+  environments:
+    - pendulum_v1
+    - hopper_v4
+    - walker2d_v4
+    - halfcheetah_v4
+  main_seeds: [0, 1, 2, 3, 4]
+  sweep_seeds: [0, 1, 2]
+
+environment:
+  n_envs: 8
+  steps_per_env: 256
+  rollout_batch_size: 2048
+  observation_normalization: true
+  observation_clip: 10.0
+  reward_normalization: false
+  reward_scaling: false
+  reward_clipping: false
+  action_squash: tanh
+  bootstrap_on_time_limit_truncation: true
+
+optimization:
+  gamma: 0.99
+  gae_lambda: 0.95
+  advantage_normalization: true
+
+evaluation:
+  deterministic: true
+  episodes: 10
+  evaluate_at_step_zero: true
+  checkpoint_every_env_steps: 10000
+  log_training_and_evaluation_separately: true
+
+architecture:
+  actor:
+    hidden_sizes: [64, 64]
+    activation: tanh
+    log_std_init: -0.5
+  critic:
+    hidden_sizes: [64, 64]
+    activation: tanh
+  initialization:
+    scheme: orthogonal
+    actor_hidden_gain: 1.41421356237
+    actor_output_gain: 0.01
+    critic_output_gain: 1.0
+
+logging:
+  metrics_csv: metrics.csv
+  updates_csv: updates.csv
+  collapse_json: collapse.json
+  latest_checkpoint: latest.pt
+  best_checkpoint: best_by_eval_mean.pt
+  normalization_state: vecnormalize.pkl
+  rng_state: rng_state.pkl
+
+sweeps:
+  environments:
+    - hopper_v4
+    - halfcheetah_v4
+  a2c:
+    actor_lr: [0.0001, 0.0003, 0.001]
+  ppo_clip:
+    actor_lr: [0.0001, 0.0003, 0.001]
+    clip_epsilon: [0.10, 0.20, 0.30]
+  ppo_kl:
+    actor_lr: [0.0001, 0.0003, 0.001]
+    target_kl: [0.01, 0.02, 0.05]
+  trpo:
+    max_kl_delta: [0.01, 0.02, 0.05]

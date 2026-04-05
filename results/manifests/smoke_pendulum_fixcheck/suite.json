@@ -1,0 +1,9 @@
+{
+  "created_at": "2026-04-03T22:34:37+00:00",
+  "device": "cpu",
+  "last_invoked_at": "2026-04-03T22:38:19+00:00",
+  "planned_run_count": 4,
+  "resume": true,
+  "suite_kind": "smoke_test",
+  "suite_name": "smoke_pendulum_fixcheck"
+}

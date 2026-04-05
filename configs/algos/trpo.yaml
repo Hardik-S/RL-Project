@@ -1,0 +1,12 @@
+algo:
+  key: trpo
+  display_name: TRPO
+  library_backend: sb3_contrib.TRPO
+  critic_lr: 0.001
+  critic_epochs: 10
+  critic_minibatch_size: 256
+  max_kl_delta: 0.02
+  cg_steps: 10
+  damping: 0.1
+  line_search_steps: 10
+  backtrack_coefficient: 0.8

@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rl-update-stability"
+version = "0.1.0"
+description = "Scaffold for a controlled RL update-stability benchmark."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Codex Scaffold" }
+]
+dependencies = [
+  "gymnasium[mujoco]",
+  "matplotlib",
+  "numpy",
+  "pandas",
+  "PyYAML",
+  "sb3-contrib",
+  "stable-baselines3",
+  "tensorboard",
+  "torch",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

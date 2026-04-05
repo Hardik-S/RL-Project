@@ -1,0 +1,17 @@
+algorithm,algorithm_display,env_key,env_id,unstable_updates_mean,unstable_updates_rate_per_100k_mean,unstable_updates_rate_per_100k_std,unstable_updates_rate_per_100k_ci_lower,unstable_updates_rate_per_100k_ci_upper,collapse_rate,collapse_count,n_runs
+a2c,A2C,halfcheetah_v4,HalfCheetah-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+ppo_clip,PPO-Clip,halfcheetah_v4,HalfCheetah-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+ppo_kl,PPO-KL,halfcheetah_v4,HalfCheetah-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+trpo,TRPO,halfcheetah_v4,HalfCheetah-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+a2c,A2C,hopper_v4,Hopper-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+ppo_clip,PPO-Clip,hopper_v4,Hopper-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+ppo_kl,PPO-KL,hopper_v4,Hopper-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+trpo,TRPO,hopper_v4,Hopper-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+a2c,A2C,pendulum_v1,Pendulum-v1,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+ppo_clip,PPO-Clip,pendulum_v1,Pendulum-v1,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+ppo_kl,PPO-KL,pendulum_v1,Pendulum-v1,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+trpo,TRPO,pendulum_v1,Pendulum-v1,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+a2c,A2C,walker2d_v4,Walker2d-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+ppo_clip,PPO-Clip,walker2d_v4,Walker2d-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+ppo_kl,PPO-KL,walker2d_v4,Walker2d-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5
+trpo,TRPO,walker2d_v4,Walker2d-v4,0.0,0.0,0.0,0.0,0.0,1.0,5,5

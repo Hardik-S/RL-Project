@@ -1,0 +1,105 @@
+{
+  "results": {
+    "a2c_pendulum_s0": {
+      "algorithm": "a2c",
+      "artifacts_present": [
+        "best_by_eval_mean.pt",
+        "collapse.json",
+        "latest.pt",
+        "metrics.csv",
+        "rng_state.pkl",
+        "run_config.json",
+        "run_metadata.json",
+        "run_status.json",
+        "tensorboard",
+        "updates.csv",
+        "vecnormalize.pkl"
+      ],
+      "collapse": {
+        "R_best": -1017.0081981594325,
+        "R_init": -1278.5997436726775,
+        "collapse_flag": 0,
+        "collapse_reason": null,
+        "collapse_step": null,
+        "collapse_threshold": -1213.2018572943662
+      },
+      "command": [
+        "C:\\Python313\\python.exe",
+        "scripts/train.py",
+        "--algo",
+        "a2c",
+        "--env",
+        "pendulum_v1",
+        "--seed",
+        "0",
+        "--suite-name",
+        "probe_a2c_pendulum_s0",
+        "--run-tag",
+        "default",
+        "--device",
+        "cpu"
+      ],
+      "completed_run": true,
+      "env_key": "pendulum_v1",
+      "executed_at": "2026-04-04T01:37:44+00:00",
+      "metrics": {
+        "entropy_nan_rows": 1,
+        "final_row": {
+          "accepted_step_fraction": NaN,
+          "advantage_mean": -84.65583801269531,
+          "advantage_std": 31.33607292175293,
+          "cg_iterations_used": NaN,
+          "clip_fraction": NaN,
+          "collapse_flag": 0.0,
+          "cumulative_unstable_updates": 0.0,
+          "entropy": 0.9174023866653442,
+          "env_steps": 100352.0,
+          "episodes_seen": 496.0,
+          "epochs_completed_before_early_stop": NaN,
+          "eval_return_mean": -1044.6586593907327,
+          "eval_return_median": -1016.808894008398,
+          "eval_return_std": 323.2744591501403,
+          "grad_norm_actor": 0.0002429766901779,
+          "grad_norm_critic": 0.4999999646238908,
+          "line_search_backtracks": NaN,
+          "max_kl_old_new": 4.124641418457031e-05,
+          "mean_kl_old_new": 1.6592821339145305e-06,
+          "nan_or_divergence_flag": 0.0,
+          "policy_loss": -0.0093275504186749,
+          "policy_ratio_mean": 0.9999897480010986,
+          "policy_ratio_std": 0.0018213762668892,
+          "train_episode_length_mean": 200.0,
+          "train_episode_return_mean": -1246.061272939046,
+          "unstable_update_flag": 0.0,
+          "value_loss": 8148.56005859375,
+          "value_target_mean": -84.82805633544922,
+          "wall_clock_seconds": 46.30229069999768
+        },
+        "nan_or_divergence_flag_max": 0,
+        "rows": 11
+      },
+      "probe_id": "a2c_pendulum_s0",
+      "return_code": 0,
+      "run_dir": "C:\\Users\\hshre\\OneDrive\\Documents\\42 - Agents\\Codex\\4453\\Project\\RL-Project\\results\\raw\\probe_a2c_pendulum_s0\\a2c\\pendulum_v1\\seed_0\\default",
+      "run_status": {
+        "collapse_flag": 0,
+        "collapse_reason": null,
+        "completed_at": "2026-04-04T01:37:43+00:00",
+        "config_hash": "071e546507de2a8c661be6871d6332c19e3e77f6a61480a20e8fc31b23d00b99",
+        "final_env_steps": 100352,
+        "reached_target_timesteps": true,
+        "run_tag": "default",
+        "started_at": "2026-04-04T01:36:55+00:00",
+        "status": "completed",
+        "suite_name": "probe_a2c_pendulum_s0",
+        "target_env_steps": 100000
+      },
+      "seed": 0,
+      "suite_name": "probe_a2c_pendulum_s0",
+      "updates": {
+        "rows": 49,
+        "unstable_updates_total": 0
+      }
+    }
+  }
+}

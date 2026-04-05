@@ -1,0 +1,59 @@
+# Python caches and build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Local editor and machine-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.temp
+*.log
+
+# Benchmark execution artifacts
+results/raw/
+results/aggregated/
+results/recovered/
+results/tmp/
+results/cache/
+results/exports/
+results/**/checkpoints/
+results/**/tensorboard/
+results/**/tb/
+results/**/*.pt
+results/**/*.pth
+results/**/*.pkl
+results/**/*.npz
+results/**/*.npy
+results/**/*.zip
+results/**/*.tar
+results/**/*.gz
+
+# Generic experiment logs and exports
+logs/
+runs/
+outputs/
+tmp/
+temp/
+scratch/
+recovered_results/
+
+# Notebook checkpoints
+.ipynb_checkpoints/

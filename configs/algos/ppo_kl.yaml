@@ -1,0 +1,12 @@
+algo:
+  key: ppo_kl
+  display_name: PPO-KL
+  library_backend: custom
+  actor_lr: 0.0003
+  critic_lr: 0.001
+  max_policy_epochs: 10
+  critic_epochs: 10
+  minibatch_size: 256
+  target_kl: 0.02
+  early_stop_on_target_kl: true
+  ratio_clipping: false

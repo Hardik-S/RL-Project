@@ -1,0 +1,17 @@
+algorithm,env_key,total_runs,collapsed_runs,nan_or_divergence_runs,reached_budget_runs,collapse_rate,nan_or_divergence_rate
+a2c,halfcheetah_v4,5,5,5,0,1.0,1.0
+a2c,hopper_v4,5,5,5,0,1.0,1.0
+a2c,pendulum_v1,5,5,5,0,1.0,1.0
+a2c,walker2d_v4,5,5,5,0,1.0,1.0
+ppo_clip,halfcheetah_v4,5,5,5,0,1.0,1.0
+ppo_clip,hopper_v4,5,5,5,0,1.0,1.0
+ppo_clip,pendulum_v1,5,5,5,0,1.0,1.0
+ppo_clip,walker2d_v4,5,5,5,0,1.0,1.0
+ppo_kl,halfcheetah_v4,5,5,5,0,1.0,1.0
+ppo_kl,hopper_v4,5,5,5,0,1.0,1.0
+ppo_kl,pendulum_v1,5,5,5,0,1.0,1.0
+ppo_kl,walker2d_v4,5,5,5,0,1.0,1.0
+trpo,halfcheetah_v4,5,5,5,0,1.0,1.0
+trpo,hopper_v4,5,5,5,0,1.0,1.0
+trpo,pendulum_v1,5,5,5,0,1.0,1.0
+trpo,walker2d_v4,5,5,5,0,1.0,1.0

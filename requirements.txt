@@ -1,0 +1,10 @@
+gymnasium[mujoco]
+matplotlib
+numpy
+pandas
+PyYAML
+sb3-contrib
+stable-baselines3
+tensorboard
+torch
+pytest

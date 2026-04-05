@@ -1,0 +1,8 @@
+algo:
+  key: a2c
+  display_name: A2C
+  library_backend: stable_baselines3.A2C
+  actor_lr: 0.0003
+  critic_lr: 0.001
+  policy_updates_per_rollout: 1
+  critic_update_passes_per_rollout: 1
