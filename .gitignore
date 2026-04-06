@@ -34,6 +34,8 @@ results/recovered/
 results/tmp/
 results/cache/
 results/exports/
+results - Copy/
+results - Copy.zip
 results/**/checkpoints/
 results/**/tensorboard/
 results/**/tb/
