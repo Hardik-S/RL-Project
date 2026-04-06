@@ -1,5 +1,7 @@
 # Analysis Regeneration
 
+Current status: the tracked aggregate exports that were copied into `report_assets/main_benchmark/` are legacy outputs from an earlier pass and should not be treated as final report evidence unless revalidated against per-run logs.
+
 This repository now includes a log-driven analysis pipeline for the benchmark defined in [03_experiment_protocol.md](C:\Users\hshre\OneDrive\Documents\42 - Agents\Codex\4453\Project\03_experiment_protocol.md).
 
 ## What It Builds
@@ -52,7 +54,7 @@ Outputs are written under `results/aggregated/`:
 - `figures/`
 - `summaries/`
 
-The most report-ready files are:
+The pipeline can produce report-ready files, but they must be validated before citation. Candidate outputs are:
 
 - `results/aggregated/figures/training_return_curves.{png,pdf}`
 - `results/aggregated/figures/wall_clock_comparison.{png,pdf}`
@@ -67,3 +69,4 @@ The most report-ready files are:
 - The curve figure uses `train_episode_return_mean` when available and falls back to `eval_return_mean` if training-return checkpoints are missing.
 - Main-benchmark figures prefer runs tagged as `main_benchmark`. If no such suite exists yet, the pipeline falls back to all non-sweep runs.
 - Sensitivity plots are inferred from sweep `run_tag` values and the stored resolved config, so algorithm names and paths are not hardcoded in the plotting layer.
+- If an aggregate output contradicts raw per-run artifacts, the aggregate output is wrong for reporting purposes.

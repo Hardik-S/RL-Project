@@ -66,3 +66,5 @@ python scripts/summarize_results.py
 - Use the same hardware/software stack when comparing wall-clock results.
 - Keep default seed sets from configs unless intentionally running a sweep/ablation.
 - Interpret AUC per environment only; do not compare pooled AUC across environments.
+- If aggregated tables or figures disagree with per-run `metrics.csv`, `updates.csv`, or `run_status.json`, treat the per-run logs as authoritative.
+- Do not cite legacy files in `report_assets/main_benchmark/` without revalidating them against the underlying run logs.

@@ -4,6 +4,13 @@ Controlled benchmark for update-stability behavior in continuous-control RL.
 Algorithms: `a2c`, `ppo_clip`, `ppo_kl`, `trpo`.  
 Environments: `Pendulum-v1`, `Hopper-v4`, `Walker2d-v4`, `HalfCheetah-v4`.
 
+## Submission-Facing Files
+
+- `docs/final_report_draft.md`: final report draft kept inside the repo.
+- `docs/FINAL_SUBMISSION_CHECKLIST.md`: last-pass submission checklist.
+- `docs/REPRODUCIBILITY.md`: exact reproduction commands.
+- `docs/artifact_provenance.md`: what is authoritative vs legacy.
+
 ## Setup
 
 1. Create and activate a Python `3.10+` virtual environment.
@@ -73,3 +80,5 @@ Aggregated outputs:
 - Wall-clock comparisons are meaningful only when runs are produced on the same hardware/software stack.
 - AUC is interpreted per environment; do not pool raw AUC across environments.
 - MuJoCo-backed environments require a working MuJoCo setup compatible with `gymnasium[mujoco]`.
+- Treat per-run logs as the source of truth when they disagree with aggregate exports.
+- The tracked files under `report_assets/main_benchmark/` are legacy copies from an earlier aggregation pass and are not authoritative for the final submission unless revalidated against raw logs.

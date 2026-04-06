@@ -46,10 +46,10 @@ The benchmark scripts write to `results/` under the repo root, so raw and aggreg
 To avoid polluting version control:
 
 - bulky local execution artifacts remain in ignored paths under `results/raw/` and `results/aggregated/`
-- compact report-facing copies were placed under `report_assets/main_benchmark/`
+- legacy report-facing copies were placed under `report_assets/main_benchmark/`
 - lightweight manifests remain under `results/manifests/`
 
-## What was copied into tracked report assets
+## Status of tracked report assets
 
 Copied from ignored execution outputs into tracked paths:
 
@@ -58,4 +58,10 @@ Copied from ignored execution outputs into tracked paths:
 - analysis summary JSON from `results/aggregated/summaries/`
 - run audit tables generated from `results/raw/main_benchmark/`
 
-These tracked copies exist so the benchmark state can be audited from the canonical repo without committing raw dumps, checkpoints, tensorboard logs, or duplicate bulky result trees.
+Those tracked copies are not automatically authoritative. The final paper audit found that some aggregate exports were inconsistent with per-run logs. For final submission use:
+
+- `docs/final_report_draft.md`
+- `docs/FINAL_SUBMISSION_CHECKLIST.md`
+- per-run logs when rebuilding any reported number
+
+Do not cite `report_assets/main_benchmark/` blindly. Revalidate any file from that directory against the underlying per-run artifacts first.
