@@ -2,12 +2,12 @@
 
 % if you need to pass options to natbib, use, e.g.:
 %     \PassOptionsToPackage{numbers, compress}{natbib}
-% before loading neurips_2026
+% before loading neurips_2024
 
 % The authors should use one of these tracks.
 % Before accepting by the NeurIPS conference, select one of the options below.
 % 0. "default" for submission
-\usepackage{neurips_2026}
+\usepackage[preprint]{neurips_2024}
 % the "default" option is equal to the "main" option, which is used for the Main Track with double-blind reviewing.
 % 1. "main" option is used for the Main Track
 %  \usepackage[main]{neurips_2026}
@@ -52,6 +52,7 @@
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{booktabs}
+\usepackage{graphicx}
 \usepackage{amsfonts}
 \usepackage{nicefrac}
 \usepackage{microtype}
@@ -108,7 +109,8 @@ All quantitative values in this section were recomputed directly from per-run \t
   \caption{Mean final evaluation return by environment (mean $\pm$ sd across 5 seeds), with collapsed runs in parentheses. Final return means the last logged evaluation checkpoint for each run, and collapsed runs remain included at their last logged evaluation return.}
   \label{tab:main-results}
   \centering
-  \small
+  \scriptsize
+  \resizebox{\linewidth}{!}{%
   \begin{tabular}{lrrrr}
     \toprule
     Environment & A2C & PPO-Clip & PPO-KL & TRPO \\
@@ -119,6 +121,7 @@ All quantitative values in this section were recomputed directly from per-run \t
     Walker2d-v4    & $321.6 \pm 17.1$ (0/5) & $675.1 \pm 84.6$ (0/5) & $504.9 \pm 290.0$ (2/5) & $\mathbf{3256.2 \pm 576.8}$ (0/5) \\
     \bottomrule
   \end{tabular}
+  }
 \end{table}
 
 Across the 80 planned runs, 74 reached the target budget and 6 terminated early under the collapse rule. Collapse counts were A2C \texttt{3}, PPO-Clip \texttt{1}, PPO-KL \texttt{2}, and TRPO \texttt{0}. Wall-clock cost preserved the expected tradeoff but did not reverse the ranking: A2C averaged \texttt{132.3 s}, PPO-KL \texttt{167.0 s}, TRPO \texttt{249.5 s}, and PPO-Clip \texttt{295.5 s}. These timings are hardware-dependent, but they still matter for an honest comparison.
@@ -168,14 +171,5 @@ This project asked whether explicit control of policy-update size improves conti
 [8] Logan Engstrom, Andrew Ilyas, Shibani Santurkar, Dimitris Tsipras, Firdaus Janoos, Larry Rudolph, and Aleksander Madry. Implementation Matters in Deep Policy Gradients: A Case Study on PPO and TRPO. In \emph{International Conference on Learning Representations}, 2020.
 
 }
-
-\appendix
-
-\section{Technical appendices and supplementary material}
-
-For the course submission, the core report stands on its own. Supplementary implementation details, reproducibility notes, and benchmark artifacts are available in the repository documentation, especially \texttt{README.md}, \texttt{docs/REPRODUCIBILITY.md}, and the tracked per-run outputs used to rebuild the reported statistics.
-
-\newpage
-\input{checklist.tex}
 
 \end{document}
