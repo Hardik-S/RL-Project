@@ -53,6 +53,7 @@
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{graphicx}
+\usepackage{array}
 \usepackage{amsfonts}
 \usepackage{nicefrac}
 \usepackage{microtype}
@@ -61,10 +62,9 @@
 \title{Empirical Evaluation of Update Stability in Continuous-Control Policy Optimization}
 
 \author{%
-  Anonymous Author(s) \\
-  Anonymous Institution \\
-  Anonymous Address \\
-  \texttt{anonymous@example.com} \\
+  Hardik Shrestha \\
+  Student ID: 251163014 \\
+  Course Final Project \\
 }
 
 \begin{document}
@@ -77,17 +77,21 @@ Policy-gradient methods are attractive for continuous control, but they are also
 
 \section{Introduction}
 
-Policy-gradient reinforcement learning is appealing because it optimizes a stochastic policy directly and handles continuous action spaces naturally. Its practical weakness is that performance is tightly coupled to update size. If policy steps are too conservative, learning is slow; if they are too aggressive, training can degrade abruptly or collapse. That tension appears in foundational policy-gradient work and remains central in modern actor-critic systems [1, 2].
+Policy-gradient reinforcement learning is appealing because it optimizes a stochastic policy directly and handles continuous action spaces naturally. That makes it a natural fit for robotics-style control tasks such as Hopper, Walker2d, and HalfCheetah, where the action is a vector of torques rather than a small discrete decision. Its practical weakness is that performance is tightly coupled to update size. If policy steps are too conservative, learning is slow; if they are too aggressive, training can degrade abruptly or collapse. That tension appears in foundational policy-gradient work and remains central in modern actor-critic systems [1, 2].
+
+The problem studied in this project is therefore not simply ``which algorithm gets the highest return.'' The more useful problem is whether explicit control of policy movement makes on-policy learning more reliable under a matched continuous-control benchmark. Existing techniques do not fully solve this problem in a plug-and-play way. A2C is simple and efficient, but it relies heavily on ordinary learning-rate tuning. TRPO has a strong theoretical motivation, but it is computationally heavier and can be sensitive to implementation details. PPO was designed to be simpler than TRPO, but the label ``PPO'' covers multiple control mechanisms, including clipping, KL penalties, and target-KL early stopping. Comparing these methods without locking the implementation and evaluation protocol can make the result reflect incidental engineering choices rather than the actual update-control idea.
 
 TRPO and PPO are best understood as responses to that step-size problem. TRPO enforces an explicit KL trust region [4]. PPO replaces second-order trust-region machinery with first-order approximations, most commonly ratio clipping or KL-based control [6]. At the same time, the deep RL evaluation literature warns that seed choice, implementation details, and protocol drift can dominate named algorithm differences [7, 8]. For a course project, that means a fair comparison is itself a technical contribution.
 
-This project therefore does not propose a new optimizer. Instead, it develops a matched empirical benchmark designed to answer one narrow question cleanly: under shared architecture, preprocessing, rollout budget, and evaluation cadence, does explicit policy-step control improve default-setting performance and robustness relative to a standard actor-critic baseline in continuous control?
+The technique developed in this project is a matched update-stability evaluation framework rather than a new optimizer. The intuition is that policy-update methods should be judged not only by final return, but also by whether they prevent unusable training runs under the same architecture, rollout budget, normalization, evaluation cadence, and seed budget. The framework locks those conditions, defines run-level collapse and update-level instability diagnostics, and then compares A2C, PPO-Clip, PPO-KL, and TRPO. The central question is narrow: under shared architecture, preprocessing, rollout budget, and evaluation cadence, does explicit policy-step control improve default-setting performance and robustness relative to a standard actor-critic baseline in continuous control?
 
 \section{Techniques to Tackle the Problem}
 
 \subsection{Related work and framing}
 
-Prior work gives three relevant ideas. First, REINFORCE and actor-critic methods make clear that policy-gradient learning is sensitive to gradient variance and update scale [1, 2]. Second, TRPO and PPO are explicit attempts to limit destructive policy movement while retaining useful policy improvement [4, 6]. Third, evaluation-focused studies show that implementation parity and reporting discipline are necessary if algorithm comparisons are to mean much at all [7, 8]. The benchmark in this project follows that third lesson directly.
+Prior work gives four relevant ideas. First, REINFORCE shows that policy gradients can be estimated directly from sampled returns, but also exposes the variance problem that makes naive policy-gradient learning hard to tune [1]. Actor-critic methods reduce that variance by learning a value baseline, and asynchronous actor-critic work showed that these ideas can scale to neural-network policies [2]. Second, approximately optimal approximate reinforcement learning and generalized advantage estimation both motivate the idea that policy improvement depends on controlling approximation error and using lower-variance advantage estimates [3, 5]. Third, TRPO and PPO are explicit attempts to limit destructive policy movement while retaining useful policy improvement [4, 6]. TRPO does this with a KL-constrained trust-region update; PPO does it with simpler first-order mechanisms such as clipping or KL control. Fourth, evaluation-focused studies show that implementation parity and reporting discipline are necessary if algorithm comparisons are to mean much at all [7, 8]. The benchmark in this project follows that fourth lesson directly.
+
+This related work also explains why the project compares existing methods rather than claiming a brand-new reinforcement-learning algorithm. The research gap is practical and empirical: students and practitioners often know that TRPO and PPO are supposed to be more stable than a plain actor-critic baseline, but the strength of that claim depends on how carefully the comparison is controlled. A sloppy comparison could give one method a better architecture, different preprocessing, different rollout lengths, or a more forgiving failure rule. The contribution here is to remove those avoidable differences and then ask whether the update-control mechanism still matters.
 
 \subsection{Benchmark design}
 
@@ -95,11 +99,39 @@ The project freezes a single comparison protocol across all four methods. Every 
 
 The benchmark logs both return and stability outcomes. Run-level robustness is measured by collapse incidence under the pre-registered relative-performance rule. Update-level behavior is measured with an unstable-update diagnostic based on a KL condition plus an immediate post-update performance drop. That diagnostic is asymmetric by design: TRPO and PPO-KL are flagged when \texttt{mean\_kl\_old\_new > 2 x 0.02 = 0.04}, whereas A2C and PPO-Clip use a fixed threshold of \texttt{0.05}. That asymmetry must be disclosed when interpreting the metric.
 
+\begin{table}[t]
+  \caption{Locked benchmark protocol used for the comparison.}
+  \label{tab:protocol}
+  \centering
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.31\linewidth}>{\raggedright\arraybackslash}p{0.61\linewidth}}
+    \toprule
+    Design choice & Value used in the final benchmark \\
+    \midrule
+    Algorithms & A2C, PPO-Clip, PPO-KL, TRPO \\
+    Environments & Pendulum-v1, Hopper-v4, Walker2d-v4, HalfCheetah-v4 \\
+    Policy/value network & Separate actor and critic MLPs, hidden sizes \texttt{[64,64]}, \texttt{tanh} activations \\
+    Rollout and advantage estimation & 2048 environment steps per update, GAE with \texttt{gamma=0.99} and \texttt{lambda=0.95} \\
+    Normalization & Observation normalization enabled, reward normalization disabled, advantage normalization enabled \\
+    Evaluation & Step 0 and every 10,000 environment steps, 10 deterministic episodes per checkpoint \\
+    Robustness reporting & Collapse incidence as the primary run-level robustness metric, with collapsed runs retained in averages \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \subsection{Compared methods}
 
 A2C is the baseline without explicit trust-region or proximal step control beyond ordinary learning-rate choice. PPO-Clip uses the clipped probability-ratio surrogate. PPO-KL uses the same rollout, minibatching, actor-critic architecture, and multi-epoch scaffold as PPO-Clip, but its policy loss is the unclipped importance-ratio surrogate \texttt{-(A * ratio)}, and policy epochs stop early once the mean KL exceeds the target. Because SB3 requires a \texttt{clip\_range} argument, the implementation passes a non-operative bound (\texttt{1e9}) while relying on target-KL early stopping as the actual control mechanism. TRPO uses an explicit KL constraint with \texttt{max\_kl\_delta = 0.02} and a second-order trust-region step.
 
 This roster is intentionally narrow. The methods are close enough that a matched comparison is meaningful, but different enough that update-control choices can still be observed.
+
+A2C represents the ordinary actor-critic case: it estimates advantages and updates the policy with no explicit constraint on the size of the policy change beyond the optimizer and learning rate. PPO-Clip represents the most common practical PPO variant. Its clipped ratio objective limits the incentive to move the new policy too far from the old one on sampled actions, but it does not solve a constrained optimization problem exactly. PPO-KL represents a different PPO-family control mechanism: it keeps the same first-order training scaffold but stops policy epochs when the empirical KL becomes too large. TRPO represents the strongest trust-region version in the comparison because the KL constraint is built into the update itself. These differences make the comparison a direct test of increasing levels of policy-step control.
+
+\subsection{Implementation and validation}
+
+The implementation is in the submitted repository under \texttt{src/}, \texttt{configs/}, \texttt{scripts/}, and \texttt{tests/}. The algorithm runners are separated by method: \texttt{a2c\_runner.py}, \texttt{ppo\_clip\_runner.py}, \texttt{ppo\_kl\_runner.py}, and \texttt{trpo\_runner.py}. The PPO-KL runner contains the main custom behavior: it asserts that ratio clipping is disabled, uses the plain ratio surrogate, and relies on target-KL early stopping. TRPO is library-backed through SB3-Contrib to avoid turning the project into a fragile reimplementation of conjugate-gradient trust-region optimization. That choice is consistent with the evaluation goal: the project is about update-control behavior under a fair harness, not about proving that a student implementation of TRPO can match a mature library.
+
+The codebase includes tests for configuration overrides, environment shapes, logging schema, checkpoint resume behavior, evaluation determinism, normalization, algorithm fairness, smoke execution, runtime status accounting, and the validation-probe framework. Those tests are important because small mismatches can change a deep RL comparison. For example, the tests check that the algorithm runners keep matched actor-critic architecture assumptions and that the logging/manifest files have the expected structure. The final project therefore includes both the benchmark code and the guardrails needed to make the comparison inspectable.
 
 \section{Evaluation}
 
@@ -126,6 +158,35 @@ All quantitative values in this section were recomputed directly from per-run \t
 
 Across the 80 planned runs, 74 reached the target budget and 6 terminated early under the collapse rule. Collapse counts were A2C \texttt{3}, PPO-Clip \texttt{1}, PPO-KL \texttt{2}, and TRPO \texttt{0}. Wall-clock cost preserved the expected tradeoff but did not reverse the ranking: A2C averaged \texttt{132.3 s}, PPO-KL \texttt{167.0 s}, TRPO \texttt{249.5 s}, and PPO-Clip \texttt{295.5 s}. These timings are hardware-dependent, but they still matter for an honest comparison.
 
+\begin{table}[t]
+  \caption{Run-level completion and collapse summary across the 80 planned benchmark runs.}
+  \label{tab:collapse}
+  \centering
+  \small
+  \begin{tabular}{lrrr}
+    \toprule
+    Algorithm & Planned runs & Collapsed runs & Completed to target budget \\
+    \midrule
+    A2C & 20 & 3 & 17 \\
+    PPO-Clip & 20 & 1 & 19 \\
+    PPO-KL & 20 & 2 & 18 \\
+    TRPO & 20 & 0 & 20 \\
+    \midrule
+    Total & 80 & 6 & 74 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Evaluation procedure and data handling}
+
+The evaluation was designed to avoid three common sources of misleading reinforcement-learning results. The first is selective reporting. Every planned run is represented in the manifest, and runs that collapsed are counted as collapsed rather than quietly excluded. This is why the final-return table states that collapsed runs remain in the mean at their last logged evaluation value. That choice is conservative: it prevents the benchmark from giving an algorithm credit only for the seeds that survived.
+
+The second source of error is mixing training return and evaluation return. Training return can be affected by exploration noise, normalization state, and partial episodes collected during rollout. The reported scores instead use the periodic evaluation callback, with deterministic policy actions and a fixed evaluation cadence. This does not make the results noise-free, but it keeps the return definition consistent across algorithms and environments.
+
+The third source of error is letting aggregate files become more authoritative than the raw run logs. During the final audit, some aggregate exports were found to be inconsistent with the per-run records. The report therefore treats \texttt{metrics.csv}, \texttt{updates.csv}, and \texttt{run\_status.json} as the source of truth. The consequence is that the report is more manual than ideal, but the numbers used in the final narrative are tied to run-level evidence rather than to stale summary files. For this project, that is the safer choice because the main claims depend on collapse counts and final logged evaluation checkpoints.
+
+The evaluation also separates sample-efficiency and compute-cost concerns. The main table compares final evaluation return under matched environment-step budgets, while the wall-clock summary reports the cost of reaching those results on the local setup. TRPO being slower is expected because its update is more complex. The useful question is whether its extra cost buys enough robustness and return to matter. In this benchmark, it did under the default configuration, but the conclusion remains bounded by the limited seed count and missing sensitivity sweeps.
+
 \subsection{Main findings}
 
 The main locomotion tasks support a narrow but defensible conclusion: explicit step control improved default-setting performance and run-level robustness relative to A2C. HalfCheetah-v4 and Walker2d-v4 carry most of that evidence. On HalfCheetah-v4, A2C averaged \texttt{-1.4} with \texttt{3/5} collapses, PPO-Clip and PPO-KL improved to \texttt{2243.6} and \texttt{1852.3} with zero collapses, and TRPO reached \texttt{3578.7}. On Walker2d-v4, TRPO separated even more strongly at \texttt{3256.2}, PPO-Clip reached \texttt{675.1}, PPO-KL reached \texttt{504.9} with \texttt{2/5} collapses, and A2C remained low at \texttt{321.6}.
@@ -136,19 +197,53 @@ TRPO therefore has the strongest overall empirical profile in this benchmark, bu
 
 PPO-KL behaved differently from PPO-Clip in implementation terms: on the MuJoCo tasks, policy optimization stopped after only about \texttt{2.7--3.1} epochs on average rather than the nominal maximum of \texttt{10}. That shows the early-stop rule was active. It does not, by itself, prove that KL-based stopping caused the observed return differences rather than simply co-occurring with them, so the claim should remain narrow.
 
+\subsection{Interpretation by environment}
+
+HalfCheetah-v4 is the clearest example of the project thesis. A2C failed to make useful progress under the locked default configuration and collapsed in three of five seeds. PPO-Clip and PPO-KL both avoided collapse and achieved much higher final returns. TRPO achieved the highest mean return, but the more important result is that all explicit step-control methods were much more usable than A2C. This supports the claim that controlling policy movement matters when the continuous-control task requires sustained improvement rather than a short initial gain.
+
+Walker2d-v4 is the strongest result for TRPO. The gap between TRPO and the first-order methods was large, and TRPO had no collapses. PPO-KL was less reliable here, with two collapses and a large standard deviation. That result matters because it prevents an oversimplified conclusion that any KL-based control is automatically enough. The details of the control mechanism still matter. In this benchmark, target-KL early stopping was active, but it did not match the stability of the explicit TRPO trust-region update on Walker2d-v4.
+
+Hopper-v4 is more ambiguous. TRPO again had the highest mean final return, but the standard deviation was very large. The correct interpretation is directional rather than definitive: Hopper-v4 is consistent with the broader conclusion that explicit step control helps, but the TRPO versus PPO-KL ranking on this environment should not be treated as statistically clean. Pendulum-v1 is the smallest task and was run with a smaller step budget. It is useful as a sanity check that the implementations train and log properly, but the main empirical weight should be placed on the MuJoCo locomotion tasks.
+
 \subsection{Robustness and metric disagreement}
 
 For this paper's main thesis about robustness, collapse incidence is the primary measure. It is a run-level failure outcome and directly reflects whether training remained usable. By that metric the ranking is clean: A2C was worst, PPO-Clip and PPO-KL were intermediate, and TRPO was best.
 
 The update-level unstable-update metric tells a less tidy story. TRPO logged nonzero unstable-update counts, concentrated on Hopper-v4 and Walker2d-v4, while the other methods did not. That diagnostic should not be over-interpreted. First, it is measuring something local rather than a run-level outcome. Second, it uses a tighter KL threshold for TRPO and PPO-KL (\texttt{0.04}) than for A2C and PPO-Clip (\texttt{0.05}). The correct conclusion is therefore not that TRPO was globally unstable, but that the local instability diagnostic and the run-level collapse metric capture different phenomena. For the main benchmark claim, collapse incidence is the more decision-relevant robustness measure.
 
+This disagreement is also a useful lesson about empirical RL evaluation. A local update can look suspicious under a KL-and-drop diagnostic without causing the whole run to fail, and a run can still be successful even if a few updates are locally noisy. Conversely, a method can avoid a particular update-level flag while still producing poor returns or collapsed runs. That is why the final report treats collapse incidence as the primary robustness metric and update instability as diagnostic context. The project would be weaker if it reported only final return, because collapse behavior is exactly the kind of failure that a stability-focused benchmark should expose.
+
+\subsection{Practical implications}
+
+For a practitioner choosing among these methods under a limited compute budget, the results suggest three practical lessons. First, a plain actor-critic baseline is useful as a reference point, but it should not be treated as a reliable default for these continuous-control tasks. A2C was cheaper per run, but its lower cost did not compensate for poor HalfCheetah-v4 performance and three collapses. In a setting where failed training runs require manual inspection or reruns, the cheaper update can become more expensive in practice.
+
+Second, PPO-Clip remains a strong engineering compromise. It avoids the complexity of TRPO, uses a first-order update, and performed much better than A2C on the main locomotion tasks. It also had only one collapse in the benchmark. If the goal were to recommend one simple baseline for a future student project, PPO-Clip would be the easiest method to justify because it is more stable than A2C here and much simpler to run than TRPO.
+
+Third, the PPO-KL result shows why method names are not enough. PPO-KL was not just stock PPO with another label; it was implemented as an unclipped ratio surrogate with target-KL early stopping. The early-stop rule was active, but that did not guarantee the best robustness profile. On Walker2d-v4, PPO-KL had two collapses and a high standard deviation. The result is not that KL information is useless. Instead, it shows that the particular way KL is used matters. An early-stop fuse is weaker than solving an explicit trust-region update, and it may react only after the optimizer has already moved into a less useful region of policy space.
+
+The strongest practical case for TRPO is reliability under this matched default setup. TRPO was slower than A2C and PPO-KL, but it had zero collapses and the highest mean final return on all four environments. That does not make TRPO universally best, especially because Hopper-v4 variance was high and the sensitivity sweeps were not completed. It does mean that the extra trust-region machinery bought something measurable in this benchmark. For a stability-focused project, that tradeoff is central: the method with the heavier update was also the one that most consistently avoided failed runs.
+
+The broader implication is that continuous-control policy optimization should be evaluated as a system, not only as an objective function. Architecture, rollout length, normalization, value bootstrapping, evaluation cadence, collapse accounting, and implementation details all affect the apparent algorithm ranking. The project's matched protocol is valuable because it makes those assumptions visible. Even when the benchmark does not produce a universal answer, it gives a more trustworthy answer to the question it actually asks.
+
 \subsection{Threats to validity}
 
-The largest limitation is the missing hyperparameter-sensitivity sweep analysis. The benchmark therefore supports a default-setting claim much more strongly than a robustness-to-hyperparameter-variation claim. The second limitation is the aggregate analysis bug: report claims had to be rebuilt from raw per-run artifacts. Third, five seeds per condition are reasonable for a one-student project but still produce wide uncertainty on noisy tasks such as Hopper-v4. Fourth, the benchmark is intentionally small. Four environments are enough for a disciplined course comparison, but not enough to justify universal claims about policy optimization. Finally, the results remain implementation-dependent. The project intentionally uses a library-backed, fairness-controlled setup, and that is the right engineering choice here, but it limits how abstractly the ranking should be interpreted.
+The largest limitation is the missing hyperparameter-sensitivity sweep analysis. The benchmark therefore supports a default-setting claim much more strongly than a robustness-to-hyperparameter-variation claim. The original project plan included sensitivity sweeps over A2C learning rate, PPO-Clip learning rate and clip range, PPO-KL learning rate and target KL, and TRPO trust-region radius. Those sweeps would have made it possible to say whether one method remains stable across a broader tuning range. Without them, the project should not claim universal robustness.
+
+The second limitation is the aggregate analysis bug: report claims had to be rebuilt from raw per-run artifacts. This is not ideal, but the mitigation is transparent. The final paper uses per-run \texttt{metrics.csv}, \texttt{updates.csv}, and \texttt{run\_status.json} files as the source of truth and explicitly warns against blindly citing known-bad aggregate exports. Third, five seeds per condition are reasonable for a one-student project but still produce wide uncertainty on noisy tasks such as Hopper-v4. Fourth, the benchmark is intentionally small. Four environments are enough for a disciplined course comparison, but not enough to justify universal claims about policy optimization. Finally, the results remain implementation-dependent. The project intentionally uses a library-backed, fairness-controlled setup, and that is the right engineering choice here, but it limits how abstractly the ranking should be interpreted.
+
+\subsection{Reproducibility and submission artifacts}
+
+The submitted repository is \url{https://github.com/Hardik-S/RL-Project}. The intended repository root is \texttt{RL-Project}, not the broader workspace folder that contains drafts, lecture files, presentation materials, and other local artifacts. The repository contains the training code, configuration files, tests, documentation, and final report artifacts. The most relevant documentation files are \texttt{README.md}, \texttt{docs/REPRODUCIBILITY.md}, \texttt{docs/03\_experiment\_protocol.md}, \texttt{docs/04\_algorithm\_spec.md}, and \texttt{docs/final\_report\_submission.pdf}.
+
+The reproducibility notes define the setup and commands needed to run tests, smoke checks, benchmark jobs, and analysis. The project also records manifests for planned and completed runs so that failed or collapsed jobs are visible rather than silently omitted. This matters for the main claim because excluding collapsed runs would make unstable algorithms look better than they were. In the final reported table, collapsed runs remain in the averages at their last logged evaluation return.
 
 \section{Conclusion}
 
-This project asked whether explicit control of policy-update size improves continuous-control training behavior under a matched benchmark. Under the locked default configuration, the answer is yes relative to A2C on the main locomotion tasks. TRPO produced the strongest overall empirical profile, combining the highest mean final return with zero collapses, although Hopper-v4 variance means that claim should be stated with caution rather than as a blanket dominance result. PPO-Clip was the strongest simpler first-order baseline. PPO-KL was active and competitive, but less reliable on Walker2d-v4. The most defensible summary is therefore modest: in this benchmark, stronger step control helped, and explicit trust-region updates worked best. The strongest next step would be to repair the aggregate pipeline fully and run the missing sensitivity sweeps.
+This project asked whether explicit control of policy-update size improves continuous-control training behavior under a matched benchmark. Under the locked default configuration, the answer is yes relative to A2C on the main locomotion tasks. TRPO produced the strongest overall empirical profile, combining the highest mean final return with zero collapses, although Hopper-v4 variance means that claim should be stated with caution rather than as a blanket dominance result. PPO-Clip was the strongest simpler first-order baseline. PPO-KL was active and competitive, but less reliable on Walker2d-v4.
+
+The developed technique, a matched update-stability benchmark with explicit collapse accounting, can effectively tackle the evaluation problem posed in this project: it separates update-control behavior from several avoidable implementation confounds and makes failed runs visible. It does not prove that one optimizer is always best, and it does not replace a full hyperparameter sweep. The most defensible summary is therefore modest: in this benchmark, stronger step control helped, and explicit trust-region updates worked best under the tested defaults.
+
+Future research should first repair and harden the aggregate analysis pipeline so that report tables are generated automatically from the same per-run source of truth used in this paper. The next step should be the missing sensitivity sweeps, because a stability claim is much stronger if it holds across learning rates, clip ranges, target-KL thresholds, and trust-region radii. A larger follow-up would add more MuJoCo or Gymnasium continuous-control tasks, increase the seed count, and report confidence intervals or paired statistical comparisons. Finally, the PPO-KL branch could be extended to compare target-KL early stopping against an adaptive KL-penalty variant, which would separate two ideas that are often grouped together under the broad PPO-KL label.
 
 \section*{References}
 
