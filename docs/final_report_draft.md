@@ -1,5 +1,9 @@
 # Empirical Evaluation of Update Stability in Continuous-Control Policy Optimization
 
+Canonical final submission note: `docs/final_report_submission.tex` and
+`docs/final_report_submission.pdf` are the authoritative final report source and
+artifact. This Markdown file is retained as an earlier draft/provenance copy.
+
 ## Abstract
 Policy-gradient methods are attractive for continuous control, but they are also sensitive to update size. This project studies that sensitivity through a controlled benchmark rather than through a new optimizer. Four closely related on-policy methods were compared under a locked implementation and evaluation protocol: A2C, PPO-Clip, PPO-KL, and TRPO. The benchmark used Pendulum-v1, Hopper-v4, Walker2d-v4, and HalfCheetah-v4, with matched architecture, preprocessing, rollout size, evaluation cadence, and seed budget. On the main locomotion tasks, the step-control methods outperformed A2C under the default configuration. TRPO achieved the highest mean final return on all four environments and zero collapses across 20 runs, although the Hopper-v4 variance was large enough that fine-grained ranking there should be interpreted cautiously. PPO-Clip was the strongest first-order baseline. PPO-KL was functionally distinct because target-KL early stopping was active, but it was less reliable on Walker2d-v4. All quantitative claims in the report were recomputed from per-run `metrics.csv`, `updates.csv`, and `run_status.json` files rather than from known-bad aggregate exports.
 

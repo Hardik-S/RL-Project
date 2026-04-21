@@ -6,7 +6,9 @@ Environments: `Pendulum-v1`, `Hopper-v4`, `Walker2d-v4`, `HalfCheetah-v4`.
 
 ## Submission-Facing Files
 
-- `docs/final_report_draft.md`: final report draft kept inside the repo.
+- `docs/final_report_submission.pdf`: canonical final report artifact for submission.
+- `docs/final_report_submission.tex`: canonical final report source.
+- `docs/final_report_draft.md`: earlier Markdown draft kept for provenance.
 - `docs/FINAL_SUBMISSION_CHECKLIST.md`: last-pass submission checklist.
 - `docs/REPRODUCIBILITY.md`: exact reproduction commands.
 - `docs/artifact_provenance.md`: what is authoritative vs legacy.

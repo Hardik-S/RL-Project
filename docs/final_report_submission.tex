@@ -1,51 +1,6 @@
 \documentclass{article}
 
-% if you need to pass options to natbib, use, e.g.:
-%     \PassOptionsToPackage{numbers, compress}{natbib}
-% before loading neurips_2024
-
-% The authors should use one of these tracks.
-% Before accepting by the NeurIPS conference, select one of the options below.
-% 0. "default" for submission
 \usepackage[preprint]{neurips_2024}
-% the "default" option is equal to the "main" option, which is used for the Main Track with double-blind reviewing.
-% 1. "main" option is used for the Main Track
-%  \usepackage[main]{neurips_2026}
-% 2. "position" option is used for the Position Paper Track
-%  \usepackage[position]{neurips_2026}
-% 3. "eandd" option is used for the Evaluations & Datasets Track
-%  \usepackage[eandd]{neurips_2026}
-% if you want to opt-in for a de-anomymized submission (not recommended, but OK):
-% \usepackage[eandd, nonanonymous]{neurips_2026}
-% 4. "creativeai" option is used for the Creative AI Track
-%  \usepackage[creativeai]{neurips_2026}
-% 5. "sglblindworkshop" option is used for the Workshop with single-blind reviewing
-%  \usepackage[sglblindworkshop]{neurips_2026}
-% 6. "dblblindworkshop" option is used for the Workshop with double-blind reviewing
-%  \usepackage[dblblindworkshop]{neurips_2026}
-
-% After being accepted, the authors should add "final" behind the track to compile a camera-ready version.
-% 1. Main Track
-%  \usepackage[main, final]{neurips_2026}
-% 2. Position Paper Track
-%  \usepackage[position, final]{neurips_2026}
-% 3. Evaluations & Datasets Track
-%  \usepackage[eandd, final]{neurips_2026}
-% 4. Creative AI Track
-%  \usepackage[creativeai, final]{neurips_2026}
-% 5. Workshop with single-blind reviewing
-%  \usepackage[sglblindworkshop, final]{neurips_2026}
-% 6. Workshop with double-blind reviewing
-%  \usepackage[dblblindworkshop, final]{neurips_2026}
-% Note. For the workshop paper template, both \title{} and \workshoptitle{} are required, with the former indicating the paper title shown in the title and the latter indicating the workshop title displayed in the footnote.
-% For workshops (5., 6.), the authors should add the name of the workshop, "\workshoptitle" command is used to set the workshop title.
-% \workshoptitle{WORKSHOP TITLE}
-
-% "preprint" option is used for arXiv or other preprint submissions
-% \usepackage[preprint]{neurips_2026}
-
-% to avoid loading the natbib package, add option nonatbib:
-%    \usepackage[nonatbib]{neurips_2026}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -58,6 +13,9 @@
 \usepackage{nicefrac}
 \usepackage{microtype}
 \usepackage{xcolor}
+\makeatletter
+\renewcommand{\@notice}{}
+\makeatother
 
 \title{Empirical Evaluation of Update Stability in Continuous-Control Policy Optimization}
 
@@ -121,11 +79,7 @@ The benchmark logs both return and stability outcomes. Run-level robustness is m
 
 \subsection{Compared methods}
 
-A2C is the baseline without explicit trust-region or proximal step control beyond ordinary learning-rate choice. PPO-Clip uses the clipped probability-ratio surrogate. PPO-KL uses the same rollout, minibatching, actor-critic architecture, and multi-epoch scaffold as PPO-Clip, but its policy loss is the unclipped importance-ratio surrogate \texttt{-(A * ratio)}, and policy epochs stop early once the mean KL exceeds the target. Because SB3 requires a \texttt{clip\_range} argument, the implementation passes a non-operative bound (\texttt{1e9}) while relying on target-KL early stopping as the actual control mechanism. TRPO uses an explicit KL constraint with \texttt{max\_kl\_delta = 0.02} and a second-order trust-region step.
-
-This roster is intentionally narrow. The methods are close enough that a matched comparison is meaningful, but different enough that update-control choices can still be observed.
-
-A2C represents the ordinary actor-critic case: it estimates advantages and updates the policy with no explicit constraint on the size of the policy change beyond the optimizer and learning rate. PPO-Clip represents the most common practical PPO variant. Its clipped ratio objective limits the incentive to move the new policy too far from the old one on sampled actions, but it does not solve a constrained optimization problem exactly. PPO-KL represents a different PPO-family control mechanism: it keeps the same first-order training scaffold but stops policy epochs when the empirical KL becomes too large. TRPO represents the strongest trust-region version in the comparison because the KL constraint is built into the update itself. These differences make the comparison a direct test of increasing levels of policy-step control.
+A2C is the baseline without explicit trust-region or proximal step control beyond ordinary learning-rate choice. PPO-Clip uses the clipped probability-ratio surrogate, limiting the incentive to move the new policy too far from the old one on sampled actions without solving an exact constrained optimization problem. PPO-KL uses the same rollout, minibatching, actor-critic architecture, and multi-epoch scaffold as PPO-Clip, but its policy loss is the unclipped importance-ratio surrogate \texttt{-(A * ratio)}, and policy epochs stop early once the mean KL exceeds the target. Because SB3 requires a \texttt{clip\_range} argument, the implementation passes a non-operative bound (\texttt{1e9}) while relying on target-KL early stopping as the actual control mechanism. TRPO uses an explicit KL constraint with \texttt{max\_kl\_delta = 0.02} and a second-order trust-region step. The roster is intentionally narrow: the methods are close enough for a matched comparison, but different enough to test increasing levels of policy-step control.
 
 \subsection{Implementation and validation}
 
@@ -179,11 +133,7 @@ Across the 80 planned runs, 74 reached the target budget and 6 terminated early 
 
 \subsection{Evaluation procedure and data handling}
 
-The evaluation was designed to avoid three common sources of misleading reinforcement-learning results. The first is selective reporting. Every planned run is represented in the manifest, and runs that collapsed are counted as collapsed rather than quietly excluded. This is why the final-return table states that collapsed runs remain in the mean at their last logged evaluation value. That choice is conservative: it prevents the benchmark from giving an algorithm credit only for the seeds that survived.
-
-The second source of error is mixing training return and evaluation return. Training return can be affected by exploration noise, normalization state, and partial episodes collected during rollout. The reported scores instead use the periodic evaluation callback, with deterministic policy actions and a fixed evaluation cadence. This does not make the results noise-free, but it keeps the return definition consistent across algorithms and environments.
-
-The third source of error is letting aggregate files become more authoritative than the raw run logs. During the final audit, some aggregate exports were found to be inconsistent with the per-run records. The report therefore treats \texttt{metrics.csv}, \texttt{updates.csv}, and \texttt{run\_status.json} as the source of truth. The consequence is that the report is more manual than ideal, but the numbers used in the final narrative are tied to run-level evidence rather than to stale summary files. For this project, that is the safer choice because the main claims depend on collapse counts and final logged evaluation checkpoints.
+The evaluation was designed to avoid three common sources of misleading reinforcement-learning results. First, every planned run is represented in the manifest, and runs that collapsed are counted as collapsed rather than quietly excluded. Collapsed runs therefore remain in the final-return mean at their last logged evaluation value. Second, the reported scores use the periodic evaluation callback with deterministic policy actions and a fixed evaluation cadence, rather than training return affected by exploration noise, normalization state, or partial rollout episodes. Third, the report treats \texttt{metrics.csv}, \texttt{updates.csv}, and \texttt{run\_status.json} as the source of truth because the final audit found inconsistent aggregate exports. This makes the final narrative more manual than ideal, but ties the reported claims to run-level evidence rather than stale summary files.
 
 The evaluation also separates sample-efficiency and compute-cost concerns. The main table compares final evaluation return under matched environment-step budgets, while the wall-clock summary reports the cost of reaching those results on the local setup. TRPO being slower is expected because its update is more complex. The useful question is whether its extra cost buys enough robustness and return to matter. In this benchmark, it did under the default configuration, but the conclusion remains bounded by the limited seed count and missing sensitivity sweeps.
 
@@ -195,7 +145,7 @@ Hopper-v4 points in the same direction but with much wider uncertainty. TRPO had
 
 TRPO therefore has the strongest overall empirical profile in this benchmark, but that claim should be stated precisely: it had the highest mean final return on all four environments and zero collapses across 20 runs, while Hopper-v4 still carries wide uncertainty. PPO-Clip was the strongest first-order baseline. It consistently improved on A2C in the locomotion suite and suffered only one collapse in the benchmark.
 
-PPO-KL behaved differently from PPO-Clip in implementation terms: on the MuJoCo tasks, policy optimization stopped after only about \texttt{2.7--3.1} epochs on average rather than the nominal maximum of \texttt{10}. That shows the early-stop rule was active. It does not, by itself, prove that KL-based stopping caused the observed return differences rather than simply co-occurring with them, so the claim should remain narrow.
+PPO-KL behaved differently from PPO-Clip in implementation terms: on the MuJoCo tasks, policy optimization stopped after only about \texttt{2.7 to 3.1} epochs on average rather than the nominal maximum of \texttt{10}. That shows the early-stop rule was active. It does not, by itself, prove that KL-based stopping caused the observed return differences rather than simply co-occurring with them, so the claim should remain narrow.
 
 \subsection{Interpretation by environment}
 
@@ -215,11 +165,7 @@ This disagreement is also a useful lesson about empirical RL evaluation. A local
 
 \subsection{Practical implications}
 
-For a practitioner choosing among these methods under a limited compute budget, the results suggest three practical lessons. First, a plain actor-critic baseline is useful as a reference point, but it should not be treated as a reliable default for these continuous-control tasks. A2C was cheaper per run, but its lower cost did not compensate for poor HalfCheetah-v4 performance and three collapses. In a setting where failed training runs require manual inspection or reruns, the cheaper update can become more expensive in practice.
-
-Second, PPO-Clip remains a strong engineering compromise. It avoids the complexity of TRPO, uses a first-order update, and performed much better than A2C on the main locomotion tasks. It also had only one collapse in the benchmark. If the goal were to recommend one simple baseline for a future student project, PPO-Clip would be the easiest method to justify because it is more stable than A2C here and much simpler to run than TRPO.
-
-Third, the PPO-KL result shows why method names are not enough. PPO-KL was not just stock PPO with another label; it was implemented as an unclipped ratio surrogate with target-KL early stopping. The early-stop rule was active, but that did not guarantee the best robustness profile. On Walker2d-v4, PPO-KL had two collapses and a high standard deviation. The result is not that KL information is useless. Instead, it shows that the particular way KL is used matters. An early-stop fuse is weaker than solving an explicit trust-region update, and it may react only after the optimizer has already moved into a less useful region of policy space.
+For a practitioner choosing among these methods under a limited compute budget, the results suggest three practical lessons. First, A2C is useful as a reference point but should not be treated as a reliable default for these continuous-control tasks. It was cheaper per run, but that lower cost did not compensate for poor HalfCheetah-v4 performance and three collapses. Second, PPO-Clip remains a strong engineering compromise: it avoids TRPO's complexity, uses a first-order update, improves clearly on A2C in the locomotion suite, and had only one collapse. Third, PPO-KL shows why method names are not enough. Its unclipped ratio surrogate with target-KL early stopping was active, but it did not guarantee the best robustness profile; on Walker2d-v4, PPO-KL had two collapses and a high standard deviation. The result is not that KL information is useless, but that the way KL is used matters.
 
 The strongest practical case for TRPO is reliability under this matched default setup. TRPO was slower than A2C and PPO-KL, but it had zero collapses and the highest mean final return on all four environments. That does not make TRPO universally best, especially because Hopper-v4 variance was high and the sensitivity sweeps were not completed. It does mean that the extra trust-region machinery bought something measurable in this benchmark. For a stability-focused project, that tradeoff is central: the method with the heavier update was also the one that most consistently avoided failed runs.
 
@@ -233,9 +179,7 @@ The second limitation is the aggregate analysis bug: report claims had to be reb
 
 \subsection{Reproducibility and submission artifacts}
 
-The submitted repository is \url{https://github.com/Hardik-S/RL-Project}. The intended repository root is \texttt{RL-Project}, not the broader workspace folder that contains drafts, lecture files, presentation materials, and other local artifacts. The repository contains the training code, configuration files, tests, documentation, and final report artifacts. The most relevant documentation files are \texttt{README.md}, \texttt{docs/REPRODUCIBILITY.md}, \texttt{docs/03\_experiment\_protocol.md}, \texttt{docs/04\_algorithm\_spec.md}, and \texttt{docs/final\_report\_submission.pdf}.
-
-The reproducibility notes define the setup and commands needed to run tests, smoke checks, benchmark jobs, and analysis. The project also records manifests for planned and completed runs so that failed or collapsed jobs are visible rather than silently omitted. This matters for the main claim because excluding collapsed runs would make unstable algorithms look better than they were. In the final reported table, collapsed runs remain in the averages at their last logged evaluation return.
+The submitted repository is \url{https://github.com/Hardik-S/RL-Project}. The intended repository root is \texttt{RL-Project}, not the broader workspace folder that contains drafts, lecture files, presentation materials, and other local artifacts. The repository contains the training code, configuration files, tests, documentation, manifests, and final report artifacts. The reproducibility notes in \texttt{README.md} and \texttt{docs/REPRODUCIBILITY.md} define the setup and commands needed to run tests, smoke checks, benchmark jobs, and analysis. The project also records planned and completed runs so that failed or collapsed jobs are visible rather than silently omitted.
 
 \section{Conclusion}
 
@@ -243,8 +187,9 @@ This project asked whether explicit control of policy-update size improves conti
 
 The developed technique, a matched update-stability benchmark with explicit collapse accounting, can effectively tackle the evaluation problem posed in this project: it separates update-control behavior from several avoidable implementation confounds and makes failed runs visible. It does not prove that one optimizer is always best, and it does not replace a full hyperparameter sweep. The most defensible summary is therefore modest: in this benchmark, stronger step control helped, and explicit trust-region updates worked best under the tested defaults.
 
-Future research should first repair and harden the aggregate analysis pipeline so that report tables are generated automatically from the same per-run source of truth used in this paper. The next step should be the missing sensitivity sweeps, because a stability claim is much stronger if it holds across learning rates, clip ranges, target-KL thresholds, and trust-region radii. A larger follow-up would add more MuJoCo or Gymnasium continuous-control tasks, increase the seed count, and report confidence intervals or paired statistical comparisons. Finally, the PPO-KL branch could be extended to compare target-KL early stopping against an adaptive KL-penalty variant, which would separate two ideas that are often grouped together under the broad PPO-KL label.
+Future research should first repair and harden the aggregate analysis pipeline so that report tables are generated automatically from the same per-run source of truth used in this paper. The next step should be the missing sensitivity sweeps, because a stability claim is much stronger if it holds across learning rates, clip ranges, target-KL thresholds, and trust-region radii. A larger follow-up would add more continuous-control tasks, increase the seed count, report confidence intervals or paired statistical comparisons, and compare target-KL early stopping against an adaptive KL-penalty variant.
 
+\clearpage
 \section*{References}
 
 {\small
