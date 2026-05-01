@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from src.utils.probe_framework import (
@@ -43,7 +44,9 @@ def test_summarize_probe_run_reports_completed_status(tmp_path: Path) -> None:
 
     assert summary["completed_run"] is True
     assert summary["metrics"]["rows"] == 1
+    assert summary["metrics"]["final_row"] == {"env_steps": 100.0, "entropy": 0.1, "nan_or_divergence_flag": 0.0}
     assert summary["updates"]["unstable_updates_total"] == 0
+    json.dumps(summary)
 
 
 def test_next_pending_probe_skips_completed_results(tmp_path: Path, monkeypatch) -> None:
