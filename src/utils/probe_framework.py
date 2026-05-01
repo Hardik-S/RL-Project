@@ -144,6 +144,14 @@ def save_probe_result(probe_id: str, payload: dict[str, Any]) -> None:
     save_json(probe_state_path(), {"results": results})
 
 
+def _json_safe_scalar(value: Any) -> Any:
+    if pd.isna(value):
+        return None
+    if hasattr(value, "item"):
+        return value.item()
+    return value
+
+
 def summarize_probe_run(case: ProbeCase, *, run_path: Path | None = None) -> dict[str, Any]:
     run_path = run_path or case.output_dir
     summary: dict[str, Any] = {
@@ -177,7 +185,7 @@ def summarize_probe_run(case: ProbeCase, *, run_path: Path | None = None) -> dic
             "rows": int(metrics.shape[0]),
         }
         if not metrics.empty:
-            final_row = metrics.iloc[-1].to_dict()
+            final_row = {key: _json_safe_scalar(value) for key, value in metrics.iloc[-1].to_dict().items()}
             metric_summary["final_row"] = final_row
         if "entropy" in metrics:
             metric_summary["entropy_nan_rows"] = int(metrics["entropy"].isna().sum())
