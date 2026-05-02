@@ -49,6 +49,8 @@ To avoid polluting version control:
 - legacy report-facing copies were placed under `report_assets/main_benchmark/`
 - lightweight manifests remain under `results/manifests/`
 
+Those manifests are still partly machine-local by design. The suite metadata files are useful to preserve, but rows such as `output_dir`, `stdout_log`, `stderr_log`, and validation-probe `run_dir` point at the machine that generated them rather than a portable checkout path. The probe progress file `results/manifests/validation_probes/probe_state.json` is therefore ignored and should be regenerated locally when validation probes are rerun.
+
 ## Status of tracked report assets
 
 Copied from ignored execution outputs into tracked paths:
