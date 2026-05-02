@@ -34,6 +34,7 @@ results/recovered/
 results/tmp/
 results/cache/
 results/exports/
+results/manifests/validation_probes/probe_state.json
 results - Copy/
 results - Copy.zip
 results/**/checkpoints/
