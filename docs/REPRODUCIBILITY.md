@@ -67,4 +67,6 @@ python scripts/summarize_results.py
 - Keep default seed sets from configs unless intentionally running a sweep/ablation.
 - Interpret AUC per environment only; do not compare pooled AUC across environments.
 - If aggregated tables or figures disagree with per-run `metrics.csv`, `updates.csv`, or `run_status.json`, treat the per-run logs as authoritative.
+- Tracked suite manifests are lightweight operator aids, not portable evidence: fields such as `output_dir`, `stdout_log`, `stderr_log`, and probe `run_dir` are expected to be absolute paths on the machine that produced the run.
+- `results/manifests/validation_probes/probe_state.json` is intentionally ignored because it records local probe progress plus machine-specific paths; regenerate it locally instead of committing it.
 - Do not cite legacy files in `report_assets/main_benchmark/` without revalidating them against the underlying run logs.
